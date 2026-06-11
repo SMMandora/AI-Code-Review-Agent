@@ -79,6 +79,8 @@ async def test_job_timeout_reported_via_on_error():
     w.enqueue(DummyJob(1))
     await asyncio.wait_for(hit.wait(), timeout=2)
     await w.stop()
+    # asyncio.timeout() converts its own deadline-cancel into TimeoutError outside
+    # the with block (CancelledError is only seen for external cancellation)
     assert isinstance(errors[0], TimeoutError)
 
 
@@ -93,5 +95,6 @@ async def test_unregistered_job_type_is_dropped():
     w = Worker(job_timeout=5)
     await w.start()
     w.enqueue(DummyJob(1))  # no handler registered
-    await asyncio.sleep(0.05)
+    await asyncio.wait_for(w._queue.join(), timeout=2)  # consumed, not stuck
+    assert w.pending() == 0
     await w.stop()  # must not raise
