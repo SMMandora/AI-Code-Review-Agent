@@ -1,0 +1,146 @@
+import hashlib
+import hmac
+import json
+
+from fastapi.testclient import TestClient
+
+from codereview.web.app import create_app
+from codereview.web.webhooks import route_event
+from codereview.worker import ReindexJob, ReviewJob, Worker
+
+
+def sign(secret: str, body: bytes) -> str:
+    return "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+
+
+def make_pr_payload(repo: str = "acme/widgets", action: str = "opened") -> dict:
+    return {
+        "action": action,
+        "number": 7,
+        "repository": {"full_name": repo, "default_branch": "main"},
+        "pull_request": {"number": 7, "head": {"sha": "abc123"}},
+    }
+
+
+def post_event(client: TestClient, secret: str, event: str, payload: dict, sig: str | None = "auto"):
+    body = json.dumps(payload).encode()
+    headers = {"X-GitHub-Event": event, "Content-Type": "application/json"}
+    if sig == "auto":
+        headers["X-Hub-Signature-256"] = sign(secret, body)
+    elif sig is not None:
+        headers["X-Hub-Signature-256"] = sig
+    return client.post("/webhooks/github", content=body, headers=headers)
+
+
+def test_invalid_signature_rejected(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = post_event(client, "wrong", "pull_request", make_pr_payload())
+        assert r.status_code == 401
+
+
+def test_missing_signature_rejected(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = post_event(client, settings.github_webhook_secret, "ping", {}, sig=None)
+        assert r.status_code == 401
+
+
+def test_ping_returns_200(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = post_event(client, settings.github_webhook_secret, "ping", {"zen": "x"})
+        assert r.status_code == 200
+
+
+def test_pr_opened_enqueues_review(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = post_event(client, settings.github_webhook_secret, "pull_request", make_pr_payload())
+        assert r.status_code == 202
+        assert app.state.worker.pending() == 1
+
+
+def test_pr_irrelevant_action_ignored(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        payload = make_pr_payload(action="labeled")
+        r = post_event(client, settings.github_webhook_secret, "pull_request", payload)
+        assert r.status_code == 204
+        assert app.state.worker.pending() == 0
+
+
+def test_wrong_repo_ignored(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        payload = make_pr_payload(repo="other/repo")
+        r = post_event(client, settings.github_webhook_secret, "pull_request", payload)
+        assert r.status_code == 204
+
+
+def test_unknown_event_ignored(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = post_event(client, settings.github_webhook_secret, "watch", {"repository": {"full_name": "acme/widgets"}})
+        assert r.status_code == 204
+
+
+def test_healthz(settings):
+    app = create_app(settings)
+    with TestClient(app) as client:
+        r = client.get("/healthz")
+        assert r.status_code == 200
+        assert r.json()["ok"] is True
+
+
+# --- route_event unit tests (no HTTP) ---
+
+
+def test_route_push_to_default_branch_enqueues_reindex(settings):
+    w = Worker()
+    payload = {
+        "ref": "refs/heads/main",
+        "after": "deadbeef",
+        "repository": {"full_name": "acme/widgets", "default_branch": "main"},
+        "commits": [
+            {"added": ["a.py"], "modified": ["b.py"], "removed": ["c.py"]},
+            {"added": [], "modified": ["a.py"], "removed": []},
+        ],
+    }
+    status, _ = route_event("push", payload, settings, w)
+    assert status == 202
+    assert w.pending() == 1
+    job = w._queue.get_nowait()
+    assert isinstance(job, ReindexJob)
+    assert sorted(job.changed) == ["a.py", "b.py"]
+    assert job.removed == ("c.py",)
+    assert job.after_sha == "deadbeef"
+
+
+def test_route_push_to_feature_branch_ignored(settings):
+    w = Worker()
+    payload = {
+        "ref": "refs/heads/feature",
+        "after": "deadbeef",
+        "repository": {"full_name": "acme/widgets", "default_branch": "main"},
+        "commits": [],
+    }
+    status, _ = route_event("push", payload, settings, w)
+    assert status == 204
+    assert w.pending() == 0
+
+
+def test_route_pr_synchronize_enqueues(settings):
+    w = Worker()
+    status, _ = route_event("pull_request", make_pr_payload(action="synchronize"), settings, w)
+    assert status == 202
+    job = w._queue.get_nowait()
+    assert isinstance(job, ReviewJob)
+    assert job.pr_number == 7 and job.head_sha == "abc123" and job.force is False
+
+
+def test_route_queue_full_returns_503(settings):
+    w = Worker(maxsize=1)
+    w.enqueue(object())
+    status, _ = route_event("pull_request", make_pr_payload(), settings, w)
+    assert status == 503
