@@ -23,6 +23,10 @@ def test_missing_header():
     assert verify_signature(SECRET, BODY, None) is False
 
 
+def test_empty_string_header():
+    assert verify_signature(SECRET, BODY, "") is False
+
+
 def test_malformed_header():
     assert verify_signature(SECRET, BODY, "sha1=abcdef") is False
 
