@@ -22,6 +22,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         app.state.worker = Worker()
         log.info("started: repo=%s", settings.github_repo)
         yield
+        await app.state.worker.stop()
 
     app = FastAPI(title="AI Code Review Agent", lifespan=lifespan)
     app.include_router(webhook_router)

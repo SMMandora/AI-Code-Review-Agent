@@ -1,4 +1,4 @@
-"""Live GitHub API smoke test. Usage: python scripts/smoke_github.py (needs .env)."""
+"""Live GitHub API smoke test. Usage: python scripts/smoke_github.py (needs .env). Requires `pip install -e .` (run via .venv)."""
 
 import asyncio
 import sys

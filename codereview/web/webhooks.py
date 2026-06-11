@@ -36,16 +36,15 @@ def route_event(
         default = payload["repository"].get("default_branch", "main")
         if payload.get("ref") != f"refs/heads/{default}":
             return 204, None
-        changed: set[str] = set()
-        removed: set[str] = set()
+        file_state: dict[str, str] = {}  # path -> "changed" | "removed"
         for c in payload.get("commits", []):
-            changed.update(c.get("added", []))
-            changed.update(c.get("modified", []))
-            removed.update(c.get("removed", []))
-        removed -= changed  # re-added in a later commit wins
+            for path in [*c.get("added", []), *c.get("modified", [])]:
+                file_state[path] = "changed"
+            for path in c.get("removed", []):
+                file_state[path] = "removed"
         job = ReindexJob(
-            changed=tuple(sorted(changed)),
-            removed=tuple(sorted(removed)),
+            changed=tuple(sorted(p for p, s in file_state.items() if s == "changed")),
+            removed=tuple(sorted(p for p, s in file_state.items() if s == "removed")),
             after_sha=payload.get("after", ""),
         )
         return (202, {"queued": True}) if worker.enqueue(job) else (503, {"queued": False})

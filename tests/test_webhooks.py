@@ -144,3 +144,37 @@ def test_route_queue_full_returns_503(settings):
     w.enqueue(object())
     status, _ = route_event("pull_request", make_pr_payload(), settings, w)
     assert status == 503
+
+
+def test_route_push_modified_then_removed_is_removed(settings):
+    w = Worker()
+    payload = {
+        "ref": "refs/heads/main",
+        "after": "deadbeef",
+        "repository": {"full_name": "acme/widgets", "default_branch": "main"},
+        "commits": [
+            {"added": [], "modified": ["gone.py"], "removed": []},
+            {"added": [], "modified": [], "removed": ["gone.py"]},
+        ],
+    }
+    route_event("push", payload, settings, w)
+    job = w._queue.get_nowait()
+    assert "gone.py" not in job.changed
+    assert job.removed == ("gone.py",)
+
+
+def test_route_push_removed_then_readded_is_changed(settings):
+    w = Worker()
+    payload = {
+        "ref": "refs/heads/main",
+        "after": "deadbeef",
+        "repository": {"full_name": "acme/widgets", "default_branch": "main"},
+        "commits": [
+            {"added": [], "modified": [], "removed": ["back.py"]},
+            {"added": ["back.py"], "modified": [], "removed": []},
+        ],
+    }
+    route_event("push", payload, settings, w)
+    job = w._queue.get_nowait()
+    assert job.changed == ("back.py",)
+    assert "back.py" not in job.removed
