@@ -74,6 +74,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 indexer = Indexer(
                     store=chunk_store, embedder=Embedder(api_key=settings.voyage_api_key)
                 )
+                from codereview.rag.retriever import Retriever
+
+                deps.retriever = Retriever(
+                    store=chunk_store, embedder=Embedder(api_key=settings.voyage_api_key)
+                )
 
                 async def run_reindex(job: ReindexJob) -> None:
                     await indexer.reindex_paths(

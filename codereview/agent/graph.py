@@ -5,6 +5,7 @@ from langgraph.graph import END, START, StateGraph
 
 from codereview.agent.cost import total_cost_usd
 from codereview.agent.nodes.checks import make_check_node
+from codereview.agent.nodes.context import make_context_node
 from codereview.agent.nodes.fetch import make_fetch_node
 from codereview.agent.nodes.post import make_post_node
 from codereview.agent.state import AgentDeps, ReviewState
@@ -29,10 +30,12 @@ def route_after_fetch(state: ReviewState) -> str:
 def build_graph(deps: AgentDeps):
     g = StateGraph(ReviewState)
     g.add_node("fetch", make_fetch_node(deps))
+    g.add_node("embed_context", make_context_node(deps))
     g.add_node("check_correctness", make_check_node("correctness", deps))
     g.add_node("post", make_post_node(deps))
     g.add_edge(START, "fetch")
-    g.add_conditional_edges("fetch", route_after_fetch, {"skip": END, "go": "check_correctness"})
+    g.add_conditional_edges("fetch", route_after_fetch, {"skip": END, "go": "embed_context"})
+    g.add_edge("embed_context", "check_correctness")
     g.add_edge("check_correctness", "post")
     g.add_edge("post", END)
     return g.compile()
