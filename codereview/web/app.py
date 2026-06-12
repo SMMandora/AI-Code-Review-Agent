@@ -61,6 +61,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 api_key=settings.anthropic_api_key, timeout=30.0, max_retries=1
             )
             deps = AgentDeps(settings=settings, gh=gh, anthropic=anthropic_client, reviews=reviews)
+
+            from codereview.repo_config import load_repo_config
+
+            async def config_loader(default_branch: str):
+                return await load_repo_config(gh, default_branch, settings.default_model)
+
+            deps.config_loader = config_loader
             app.state.deps = deps
             app.state.worker.register(ReviewJob, make_run_review(deps))
             app.state.worker.on_error = make_on_error(deps)
