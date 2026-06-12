@@ -30,7 +30,7 @@ def build_cost_svg(rows: list[dict], ceiling: float, width: int = 760, height: i
             f'fill="#888">No reviews yet</text></svg>'
         )
     points = list(reversed(rows))  # recent() is newest-first
-    max_y = max(max(float(r["cost_usd"]) for r in points), ceiling) * 1.15
+    max_y = max(max(float(r["cost_usd"]) for r in points), ceiling, 1e-9) * 1.15
     step = (width - 2 * pad) / max(len(points) - 1, 1)
 
     def x(i: int) -> float:
@@ -86,8 +86,7 @@ async def dashboard(request: Request) -> HTMLResponse:
         "p50_s": percentile(durations, 50) / 1000,
         "p95_s": percentile(durations, 95) / 1000,
     }
-    completed_rows = [r for r in rows if r["status"] == "completed"]
-    chart = build_cost_svg(completed_rows, settings.cost_ceiling_usd)
+    chart = build_cost_svg(completed, settings.cost_ceiling_usd)
     html = _env.get_template("dashboard.html").render(rows=rows, stats=stats, chart_svg=chart)
     return HTMLResponse(html)
 
