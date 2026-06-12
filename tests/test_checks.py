@@ -55,6 +55,18 @@ async def test_validation_failure_retries_once_then_succeeds(settings):
     assert "failed schema validation" in fake.calls[1]["messages"][0]["content"]
 
 
+async def test_exception_then_success_retries(settings):
+    # the real SDK raises (e.g. pydantic.ValidationError) on schema mismatch —
+    # the exception branch is the production retry path
+    good = ModelFinding(path="app/util.py", line=2, severity="medium", message="ok")
+    fake = FakeAnthropic([RuntimeError("validation failed"), parse_response([good])])
+    node = make_check_node("correctness", make_deps(settings, fake))
+    out = await node(make_state())
+    assert len(out["findings"]) == 1
+    assert len(fake.calls) == 2
+    assert "failed schema validation" in fake.calls[1]["messages"][0]["content"]
+
+
 async def test_double_failure_fails_soft(settings):
     fake = FakeAnthropic([RuntimeError("api down"), RuntimeError("api down")])
     node = make_check_node("security", make_deps(settings, fake))
@@ -62,5 +74,6 @@ async def test_double_failure_fails_soft(settings):
     assert "findings" not in out or out["findings"] == []
     [err] = out["errors"]
     assert err.node == "security"
+    assert "api down" in err.error  # terminal message carries the root cause
     [u] = out["usage"]
     assert u.input_tokens == 0 and u.output_tokens == 0

@@ -44,7 +44,8 @@ async def call_model(client, model: str, system: str, user: str, max_tokens: int
         if getattr(resp, "parsed_output", None) is not None:
             return resp.parsed_output, resp.usage
         content = user + RETRY_SUFFIX
-    raise CheckParseError(f"model call failed twice: {last_exc!r}")
+    # last_exc=None means both replies parsed but failed schema validation client-side
+    raise CheckParseError(f"model call failed twice (last_error={last_exc!r})")
 
 
 def make_check_node(category: str, deps: AgentDeps):
