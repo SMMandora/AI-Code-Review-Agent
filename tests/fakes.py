@@ -31,3 +31,21 @@ class FakeAnthropic:
         if isinstance(item, Exception):
             raise item
         return item
+
+
+class FakeVoyage:
+    """Duck-type of voyageai.AsyncClient."""
+
+    def __init__(self, dim: int = 4, fail_times: int = 0) -> None:
+        self.dim = dim
+        self.calls: list[tuple[list[str], str, str]] = []
+        self._fail = fail_times
+
+    async def embed(self, texts, model, input_type, **kwargs):
+        if self._fail > 0:
+            self._fail -= 1
+            raise RuntimeError("503 from voyage")
+        self.calls.append((list(texts), model, input_type))
+        return SimpleNamespace(
+            embeddings=[[float(len(t) % 97)] * self.dim for t in texts]
+        )
