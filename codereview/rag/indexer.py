@@ -20,6 +20,8 @@ class Chunk:
 
 
 def window_chunks(text: str, size: int, overlap: int) -> list[tuple[int, int, str]]:
+    if overlap >= size:
+        raise ValueError(f"overlap ({overlap}) must be smaller than size ({size})")
     lines = text.splitlines()
     if not lines:
         return []

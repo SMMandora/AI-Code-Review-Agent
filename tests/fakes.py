@@ -52,6 +52,10 @@ class FakeVoyage:
 
 
 class FakeChunkStore:
+    """Fidelity notes: search() returns insertion order (the real store orders by
+    vector distance) and count() ignores delete_paths — don't write order-sensitive
+    or count-after-delete assertions against this fake."""
+
     def __init__(self, snippets: list[Snippet] | None = None) -> None:
         self.snippets = snippets or []
         self.upserts: list = []
@@ -67,6 +71,7 @@ class FakeChunkStore:
 
     async def wipe(self):
         self.snippets = []
+        self.upserts = []
 
     async def count(self):
         return sum(len(c) for c, _, _ in self.upserts)

@@ -8,6 +8,13 @@ def test_window_chunks_with_overlap():
     assert out[0][2].startswith("line1\n")
 
 
+def test_window_chunks_rejects_bad_overlap():
+    import pytest
+
+    with pytest.raises(ValueError):
+        window_chunks("a\nb", size=10, overlap=10)
+
+
 def test_window_chunks_short_file():
     out = window_chunks("a\nb", size=60, overlap=10)
     assert out == [(1, 2, "a\nb")]
