@@ -7,7 +7,7 @@ from codereview.diff import DiffFile, snap_line
 SEV_RANK = {"high": 0, "medium": 1, "low": 2}
 CATEGORY_RANK = {"security": 0, "correctness": 1, "test_coverage": 2, "style": 3}
 SIMILARITY = 0.7
-LINE_WINDOW = 2
+LINE_WINDOW = 3  # spec §10: findings within ±3 lines on the same file may group
 
 
 @dataclass

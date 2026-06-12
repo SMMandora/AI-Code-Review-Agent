@@ -61,8 +61,15 @@ def test_cap_seven_by_severity_then_category():
 
 
 def test_snapping_applied_before_grouping():
-    a = mk(line=2)
-    b = mk(line=7, msg="division by zero risk!")  # snaps to 5... then |5-2|>3 -> kept
+    a = mk(line=1)
+    b = mk(line=10, msg="division by zero risk!")  # snaps 10 -> 5; |5 - 1| = 4 > 3 -> kept
     out = apply_dedup([a, b], files(), threshold="low")
     assert len(out.inline) == 2
-    assert {f.line for f in out.inline} == {2, 5}
+    assert {f.line for f in out.inline} == {1, 5}
+
+
+def test_grouping_uses_snapped_lines_within_window():
+    a = mk(line=2)
+    b = mk(line=7, msg="division by zero risk!")  # snaps 7 -> 5; |5 - 2| = 3 <= 3 -> grouped
+    out = apply_dedup([a, b], files(), threshold="low")
+    assert len(out.inline) == 1
