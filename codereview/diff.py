@@ -43,7 +43,8 @@ def snap_line(df: DiffFile, line: int, max_dist: int = 5) -> int | None:
     """Nearest commentable NEW-side line within max_dist, else None (spec §8)."""
     if line in df.commentable:
         return line
-    best = min(df.commentable, key=lambda c: abs(c - line), default=None)
+    # secondary key c: equidistant candidates resolve to the earlier line
+    best = min(df.commentable, key=lambda c: (abs(c - line), c), default=None)
     if best is not None and abs(best - line) <= max_dist:
         return best
     return None

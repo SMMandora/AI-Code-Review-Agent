@@ -14,8 +14,8 @@ def test_modified_file():
     assert not f.is_new and not f.is_deleted and not f.is_binary
     assert f.commentable == frozenset({1, 2, 3, 4, 5, 6, 7, 8})
     assert "return a - b" in f.added_text
-    assert "return a + b\n" not in f.added_text.replace("    return a + b", "", 0) or True
-    assert f.raw.startswith("diff --git") or f.raw.startswith("--- ")
+    assert "return a + b" not in f.added_text  # context/removed lines excluded
+    assert f.raw.startswith("diff --git a/app/calc.py b/app/calc.py")
 
 
 def test_new_file():
