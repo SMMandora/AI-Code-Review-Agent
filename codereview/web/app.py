@@ -74,18 +74,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if app.state.db is not None and settings.voyage_api_key:
                 from codereview.rag.embedder import Embedder
                 from codereview.rag.indexer import Indexer
+                from codereview.rag.retriever import Retriever
                 from codereview.rag.store import ChunkStore
                 from codereview.worker import ReindexJob
 
                 chunk_store = ChunkStore(app.state.db)
-                indexer = Indexer(
-                    store=chunk_store, embedder=Embedder(api_key=settings.voyage_api_key)
-                )
-                from codereview.rag.retriever import Retriever
-
-                deps.retriever = Retriever(
-                    store=chunk_store, embedder=Embedder(api_key=settings.voyage_api_key)
-                )
+                embedder = Embedder(api_key=settings.voyage_api_key)
+                indexer = Indexer(store=chunk_store, embedder=embedder)
+                deps.retriever = Retriever(store=chunk_store, embedder=embedder)
 
                 async def run_reindex(job: ReindexJob) -> None:
                     await indexer.reindex_paths(

@@ -98,7 +98,6 @@ class ReviewState(TypedDict, total=False):
     usage: Annotated[list[NodeUsage], operator.add]
     errors: Annotated[list[CheckError], operator.add]
     skip_reason: str
-    dedup: Any  # DedupResult (Task 18)
     posted: bool
     comments_posted: int
     findings_total: int
