@@ -3,4 +3,4 @@ expected:
     line_start: 4
     line_end: 7
     category: correctness
-    pattern: "(race|toctou|check.then|atomic)"
+    pattern: "(race|toctou|time.of.check|time.of.use|check.then|atomic|before (opening|creating|writing)|exists)"

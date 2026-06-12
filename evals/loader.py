@@ -53,4 +53,12 @@ def load_fixture(path: Path) -> EvalFixture:
 
 
 def load_all() -> list[EvalFixture]:
-    return [load_fixture(p) for p in sorted(FIXTURES_DIR.iterdir()) if p.is_dir()]
+    fixtures = []
+    for p in sorted(FIXTURES_DIR.iterdir()):
+        if not (p.is_dir() and p.name.startswith("pr_")):
+            continue
+        try:
+            fixtures.append(load_fixture(p))
+        except Exception as exc:
+            raise RuntimeError(f"fixture {p.name} failed to load: {exc}") from exc
+    return fixtures

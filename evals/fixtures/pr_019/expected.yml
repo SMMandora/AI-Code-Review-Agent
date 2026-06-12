@@ -3,9 +3,9 @@ expected:
     line_start: 4
     line_end: 11
     category: security
-    pattern: "(validat|unrestricted|size|type)"
+    pattern: "(validat|unrestricted|size|type|traversal|sanitiz)"
   - path: web/upload.ts
     line_start: 1
     line_end: 11
     category: test_coverage
-    pattern: "test"
+    pattern: "(no tests?|untested|missing test|add (a )?test|not covered|test coverage|without (any )?tests?)"

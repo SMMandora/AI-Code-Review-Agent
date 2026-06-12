@@ -36,3 +36,20 @@ def test_categories_valid(fx):
 
     for ex in fx.expected:
         assert ex.category in CATEGORIES
+
+
+@pytest.mark.parametrize("fx", FIXTURES, ids=lambda f: f.name)
+def test_same_category_expecteds_cannot_dedup_merge(fx):
+    """Two same-category expecteds within dedup's LINE_WINDOW would be merged by
+    the production pipeline, making the second expected unmatchable forever."""
+    from codereview.agent.dedup import LINE_WINDOW
+
+    by_key: dict = {}
+    for ex in fx.expected:
+        by_key.setdefault((ex.path, ex.category), []).append(ex)
+    for group in by_key.values():
+        group.sort(key=lambda e: e.line_start)
+        for a, b in zip(group, group[1:], strict=False):
+            assert b.line_start - a.line_end > LINE_WINDOW, (
+                f"{fx.name}: same-category expecteds {a} and {b} are within the dedup window"
+            )

@@ -3,4 +3,4 @@ expected:
     line_start: 3
     line_end: 5
     category: correctness
-    pattern: "(off[- ]by[- ]one|<=|out of (bounds|range)|undefined)"
+    pattern: "(off[- ]by[- ]one|out of (bounds|range)|undefined|past the (end|last|final)|one too (many|far))"

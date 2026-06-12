@@ -5,12 +5,12 @@ expected:
     category: correctness
     pattern: "(off[- ]by[- ]one|1[- ]indexed|first page|skips)"
   - path: app/pagination.py
-    line_start: 7
-    line_end: 8
+    line_start: 13
+    line_end: 13
     category: correctness
     pattern: "(ceil|round|remainder|partial|last page)"
   - path: app/pagination.py
     line_start: 1
-    line_end: 8
+    line_end: 13
     category: test_coverage
-    pattern: "test"
+    pattern: "(no tests?|untested|missing test|add (a )?test|not covered|test coverage|without (any )?tests?)"

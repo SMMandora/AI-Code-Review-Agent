@@ -3,4 +3,4 @@ expected:
     line_start: 5
     line_end: 7
     category: correctness
-    pattern: "(===|strict|coerc)"
+    pattern: "(strict|coerc|loose)"

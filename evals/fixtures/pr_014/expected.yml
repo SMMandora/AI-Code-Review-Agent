@@ -8,4 +8,4 @@ expected:
     line_start: 1
     line_end: 11
     category: test_coverage
-    pattern: "test"
+    pattern: "(no tests?|untested|missing test|add (a )?test|not covered|test coverage|without (any )?tests?)"

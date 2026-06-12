@@ -66,6 +66,9 @@ async def main() -> int:
         fixtures = [f for f in fixtures if f.name == args.pr]
     if args.limit:
         fixtures = fixtures[: args.limit]
+    if not fixtures:
+        print(f"FAIL: no fixtures matched (pr={args.pr!r})")
+        return 2
 
     total_expected = total_matched = 0
     total_extra = total_cost = 0.0

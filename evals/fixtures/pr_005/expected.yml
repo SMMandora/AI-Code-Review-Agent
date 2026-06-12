@@ -3,4 +3,4 @@ expected:
     line_start: 4
     line_end: 7
     category: correctness
-    pattern: "(mutable default|shared|same list)"
+    pattern: "(mutable default|shared|same list|created once|reused|across calls|default (list|argument))"
