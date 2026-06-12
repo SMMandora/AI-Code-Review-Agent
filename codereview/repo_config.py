@@ -23,4 +23,6 @@ class RepoConfig(BaseModel):
         return v
 
     def skips(self, path: str) -> bool:
+        # fnmatch, not gitignore: `*` crosses `/` (so `*.lock` matches at any depth),
+        # while `dist/**` anchors at the repo root and does NOT match `pkg/dist/...`.
         return any(fnmatch(path, pattern) for pattern in self.skip_files)
