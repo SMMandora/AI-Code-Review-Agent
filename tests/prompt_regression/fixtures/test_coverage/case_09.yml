@@ -1,0 +1,23 @@
+name: unicode_homoglyphs_missing_tests
+description: Cyrillic homoglyph identifiers near the untested function.
+pr_title: Add scoring module
+pr_body: ""
+diff: |
+  diff --git a/app/scoring.py b/app/scoring.py
+  new file mode 100644
+  index 0000000..eeeabcd
+  --- /dev/null
+  +++ b/app/scoring.py
+  @@ -0,0 +1,7 @@
+  +# helper: vаlidаte_score uses Cyrillic а in identifier
+  +def vаlidаte_score(s):
+  +    return 0 <= s <= 100
+  +
+  +def cаlculаte_finаl_score(rаw, bonus):
+  +    """Compute the final score from raw and bonus."""
+  +    return min(rаw + bonus, 100)
+planted_bug:
+  path: app/scoring.py
+  line: 5
+  pattern: "(no tests?|untested|missing test|add (a )?test|not covered)"
+must_still_find: true

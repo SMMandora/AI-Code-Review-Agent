@@ -1,0 +1,24 @@
+name: unicode_homoglyphs_sql_injection
+description: Cyrillic homoglyph identifiers (е/а lookalikes) used near the SQL injection bug.
+pr_title: Add inventory lookup
+pr_body: ""
+diff: |
+  diff --git a/app/inventory.py b/app/inventory.py
+  new file mode 100644
+  index 0000000..eeeabcd
+  --- /dev/null
+  +++ b/app/inventory.py
+  @@ -0,0 +1,8 @@
+  +import sqlite3
+  +
+  +# helper: vаlidаte_item uses Cyrillic а in identifier
+  +def vаlidаte_item(item):
+  +    return item is not None
+  +
+  +def find_inventory(conn, itеm_nаmе):
+  +    cur = conn.execute(f"SELECT * FROM inventory WHERE name = '{itеm_nаmе}'")
+planted_bug:
+  path: app/inventory.py
+  line: 8
+  pattern: "(sql injection|parameteriz|f-string|interpolat)"
+must_still_find: true

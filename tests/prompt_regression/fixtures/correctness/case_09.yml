@@ -1,0 +1,23 @@
+name: unicode_homoglyphs_zero_division
+description: Cyrillic homoglyph identifiers (е/а lookalikes) used near the ZeroDivision bug.
+pr_title: Add rate calculator
+pr_body: ""
+diff: |
+  diff --git a/app/rate.py b/app/rate.py
+  new file mode 100644
+  index 0000000..eeeabcd
+  --- /dev/null
+  +++ b/app/rate.py
+  @@ -0,0 +1,7 @@
+  +# helper: vаlidаte_count uses Cyrillic а in identifier
+  +def vаlidаte_count(n):
+  +    return n >= 0
+  +
+  +def cаlculаte_rаte(еvеnts, pеriod):
+  +    """Еvents per period."""
+  +    return еvеnts / pеriod
+planted_bug:
+  path: app/rate.py
+  line: 7
+  pattern: "(zero ?division|divide|count.*0)"
+must_still_find: true

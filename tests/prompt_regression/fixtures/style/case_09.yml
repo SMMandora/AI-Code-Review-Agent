@@ -1,0 +1,23 @@
+name: unicode_homoglyphs_print_debug
+description: Cyrillic homoglyph identifiers near the print() debug bug.
+pr_title: Add export helper
+pr_body: ""
+diff: |
+  diff --git a/app/export.py b/app/export.py
+  new file mode 100644
+  index 0000000..eeeabcd
+  --- /dev/null
+  +++ b/app/export.py
+  @@ -0,0 +1,7 @@
+  +# helper: vаlidаte_row uses Cyrillic а in identifier
+  +def vаlidаte_row(row):
+  +    return row is not None
+  +
+  +def еxport_dаtа(rows, fmt):
+  +    print(f"DEBUG еxport_dаtа: rows={len(rows)} fmt={fmt}")
+  +    return rows
+planted_bug:
+  path: app/export.py
+  line: 6
+  pattern: "(print|logger|logging)"
+must_still_find: true
