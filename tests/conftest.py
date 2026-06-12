@@ -29,6 +29,6 @@ async def db():
 
     database = await Database.connect(os.environ["DATABASE_URL"])
     async with database.pool.acquire() as conn:
-        await conn.execute("TRUNCATE chunks, reviews, index_state")
+        await conn.execute("TRUNCATE chunks, reviews, index_state RESTART IDENTITY CASCADE")
     yield database
     await database.close()

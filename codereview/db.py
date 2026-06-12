@@ -33,7 +33,8 @@ class Database:
         try:
             async with self.pool.acquire() as conn:
                 return await conn.fetchval("SELECT 1") == 1
-        except Exception:
+        except Exception as exc:
+            log.warning("db ping failed: %r", exc)
             return False
 
 

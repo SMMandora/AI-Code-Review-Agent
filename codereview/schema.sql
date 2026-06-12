@@ -1,3 +1,5 @@
+-- Requires the CREATE EXTENSION privilege. On managed Postgres (RDS, Cloud SQL,
+-- Neon, ...) enable pgvector via the provider first if this fails at startup.
 CREATE EXTENSION IF NOT EXISTS vector;
 
 CREATE TABLE IF NOT EXISTS chunks (
