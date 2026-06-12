@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from codereview.agent.state import CheckResult, ModelFinding
+from codereview.agent.state import CheckResult, ModelFinding, Snippet
 
 
 def parse_response(findings: list[ModelFinding] | None = None, input_tokens: int = 1000, output_tokens: int = 200):
@@ -49,3 +49,36 @@ class FakeVoyage:
         return SimpleNamespace(
             embeddings=[[float(len(t) % 97)] * self.dim for t in texts]
         )
+
+
+class FakeChunkStore:
+    def __init__(self, snippets: list[Snippet] | None = None) -> None:
+        self.snippets = snippets or []
+        self.upserts: list = []
+        self.deleted: list[list[str]] = []
+        self.index_state: tuple[str, str] | None = None
+        self.search_calls: list[dict] = []
+
+    async def upsert(self, chunks, embeddings, commit_sha):
+        self.upserts.append((list(chunks), list(embeddings), commit_sha))
+
+    async def delete_paths(self, paths):
+        self.deleted.append(list(paths))
+
+    async def wipe(self):
+        self.snippets = []
+
+    async def count(self):
+        return sum(len(c) for c, _, _ in self.upserts)
+
+    async def search(self, embedding, source_type, k, exclude_path=None):
+        self.search_calls.append(
+            {"source_type": source_type, "k": k, "exclude_path": exclude_path}
+        )
+        return [
+            s for s in self.snippets
+            if s.source_type == source_type and s.path != exclude_path
+        ][:k]
+
+    async def set_index_state(self, repo, sha):
+        self.index_state = (repo, sha)
