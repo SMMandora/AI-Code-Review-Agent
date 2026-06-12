@@ -37,7 +37,7 @@ def compose_review_body(state: ReviewState, summary_only: list[Finding], cost_us
         f"{counts['high']} high / {counts['medium']} medium / {counts['low']} low"
     )
     if errors:
-        failed = ", ".join(e.node for e in errors)
+        failed = ", ".join(sorted(e.node for e in errors))
         lines += ["", f"⚠️ Checks that failed to run: {failed}"]
     if cfg.warnings:
         lines += [""] + [f"⚠️ Config: {w}" for w in cfg.warnings]
