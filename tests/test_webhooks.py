@@ -186,3 +186,54 @@ def test_route_push_removed_then_readded_is_changed(settings):
     job = w._queue.get_nowait()
     assert job.changed == ("back.py",)
     assert "back.py" not in job.removed
+
+
+def make_comment_payload(
+    body="/review again", association="OWNER", is_pr=True, repo="acme/widgets"
+):
+    issue = {"number": 7}
+    if is_pr:
+        issue["pull_request"] = {"url": "https://api.github.com/..."}
+    return {
+        "action": "created",
+        "repository": {"full_name": repo, "default_branch": "main"},
+        "issue": issue,
+        "comment": {"body": body, "author_association": association},
+    }
+
+
+def test_review_again_enqueues_forced_job(settings):
+    w = Worker()
+    status, _ = route_event("issue_comment", make_comment_payload(), settings, w)
+    assert status == 202
+    job = w._queue.get_nowait()
+    assert isinstance(job, ReviewJob)
+    assert job.force is True and job.trigger == "slash"
+    assert job.pr_number == 7 and job.head_sha is None  # resolved at fetch time
+
+
+def test_review_again_with_trailing_text(settings):
+    w = Worker()
+    payload = make_comment_payload(body="/review again please")
+    status, _ = route_event("issue_comment", payload, settings, w)
+    assert status == 202
+
+
+def test_other_comments_ignored(settings):
+    w = Worker()
+    status, _ = route_event("issue_comment", make_comment_payload(body="nice work"), settings, w)
+    assert status == 204 and w.pending() == 0
+
+
+def test_non_collaborator_cannot_trigger(settings):
+    w = Worker()
+    payload = make_comment_payload(association="NONE")
+    status, _ = route_event("issue_comment", payload, settings, w)
+    assert status == 204 and w.pending() == 0
+
+
+def test_comment_on_plain_issue_ignored(settings):
+    w = Worker()
+    payload = make_comment_payload(is_pr=False)
+    status, _ = route_event("issue_comment", payload, settings, w)
+    assert status == 204 and w.pending() == 0

@@ -32,6 +32,16 @@ def route_event(
         )
         return (202, {"queued": True}) if worker.enqueue(job) else (503, {"queued": False})
 
+    if event == "issue_comment" and payload.get("action") == "created":
+        issue = payload.get("issue") or {}
+        comment = payload.get("comment") or {}
+        body = (comment.get("body") or "").strip()
+        allowed = comment.get("author_association") in {"OWNER", "MEMBER", "COLLABORATOR"}
+        if "pull_request" in issue and body.startswith("/review again") and allowed:
+            job = ReviewJob(pr_number=issue["number"], force=True, trigger="slash")
+            return (202, {"queued": True}) if worker.enqueue(job) else (503, {"queued": False})
+        return 204, None
+
     if event == "push":
         default = payload["repository"].get("default_branch", "main")
         if payload.get("ref") != f"refs/heads/{default}":
