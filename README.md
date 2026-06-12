@@ -43,7 +43,7 @@ See [docs/architecture.md](docs/architecture.md) for component diagrams and desi
 python -m venv .venv
 .venv\Scripts\Activate.ps1       # bash: . .venv/Scripts/activate
 pip install -e .[dev]
-cp .env.example .env             # fill in all values
+Copy-Item .env.example .env      # bash: cp .env.example .env — fill in all values
 docker compose up -d db
 python scripts/smoke_github.py
 python scripts/seed_index.py
@@ -114,7 +114,9 @@ this is a concern.
 
 ## 9. Testing and quality gates
 
-```bash
+```powershell
+# Windows PowerShell (bash: use .venv/Scripts/python and VAR=value syntax)
+
 # Offline suite — no API keys, no network
 .venv\Scripts\python.exe -m pytest
 

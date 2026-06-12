@@ -15,8 +15,7 @@ flowchart LR
         EC --> C2[check_security]
         EC --> C3[check_style]
         EC --> C4[check_test_coverage]
-        C1 & C2 & C3 & C4 --> D[dedup]
-        D --> P[post]
+        C1 & C2 & C3 & C4 --> P["post (dedup → compose → POST)"]
     end
     G -- "1 POST /pulls/N/reviews" --> GH
     G <--> PG[(Postgres + pgvector)]
