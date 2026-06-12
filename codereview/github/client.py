@@ -84,6 +84,8 @@ class GitHubClient:
         data = resp.json()
         if isinstance(data, dict) and data.get("encoding") == "base64":
             return base64.b64decode(data["content"]).decode("utf-8", errors="replace")
+        # directories return a list; files >1MB return encoding=None with a download_url
+        log.warning("contents API returned non-decodable payload for %s@%s", path, ref)
         return None
 
     async def get_default_branch(self) -> str:

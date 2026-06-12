@@ -1,4 +1,5 @@
 import base64
+import json
 
 import httpx
 import pytest
@@ -63,8 +64,6 @@ async def test_create_review_payload(gh):
     )
     comments = [{"path": "a.py", "line": 3, "side": "RIGHT", "body": "issue"}]
     await gh.create_review(7, "abc123", "summary", comments)
-    import json
-
     sent = json.loads(route.calls.last.request.content)
     assert sent == {
         "commit_id": "abc123",
