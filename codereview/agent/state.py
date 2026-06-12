@@ -83,7 +83,7 @@ class AgentDeps:
     anthropic: Any
     reviews: Any
     retriever: Any = None
-    config_loader: Any = None  # async (default_branch: str) -> RepoConfig; Task 20
+    config_loader: Any = None  # async (default_branch: str) -> RepoConfig
 
 
 class ReviewState(TypedDict, total=False):

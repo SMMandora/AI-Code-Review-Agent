@@ -46,18 +46,26 @@ async def load_repo_config(gh, ref: str, default_model: str) -> "RepoConfig":
     if raw is None:
         return RepoConfig(model=default_model)
 
+    def label(text: object) -> str:
+        # repo-controlled text lands in the review body markdown — neutralize it
+        return " ".join(str(text).replace("`", "'").split())[:120]
+
     try:
         data = yaml.safe_load(raw) or {}
         if not isinstance(data, dict):
             raise ValueError("top level must be a mapping")
     except Exception as exc:
-        warnings.append(f"`.codereview.yml` could not be parsed ({exc}); using defaults.")
+        warnings.append(f"`.codereview.yml` could not be parsed ({label(exc)}); using defaults.")
         return RepoConfig(model=default_model, warnings=warnings)
 
-    unknown = sorted(set(data) - KNOWN_KEYS)
+    # non-string keys (yaml `1:` / `true:`) are unknown by definition and would
+    # crash RepoConfig(**data) with a TypeError if left in
+    unknown = sorted(
+        (k for k in data if not (isinstance(k, str) and k in KNOWN_KEYS)), key=str
+    )
     for key in unknown:
-        warnings.append(f"`.codereview.yml` unknown key `{key}` ignored.")
-        data.pop(key)
+        warnings.append(f"`.codereview.yml` unknown key `{label(key)}` ignored.")
+        data.pop(key, None)
 
     data.setdefault("model", default_model)
     try:

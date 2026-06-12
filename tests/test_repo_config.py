@@ -78,3 +78,13 @@ async def test_missing_model_key_uses_default():
         FakeGH("severity_threshold: high\n"), "main", default_model="claude-haiku-4-5"
     )
     assert cfg.model == "claude-haiku-4-5" and cfg.severity_threshold == "high"
+
+
+async def test_markdown_and_nonstring_keys_neutralized():
+    yml = "'evil `key` here': true\n1: 2\nmodel: claude-sonnet-4-6\n"
+    cfg = await load_repo_config(FakeGH(yml), "main", default_model="claude-sonnet-4-6")
+    assert cfg.model == "claude-sonnet-4-6"  # loader survived non-string key
+    assert len(cfg.warnings) == 2
+    joined = " ".join(cfg.warnings)
+    assert "evil 'key' here" in joined  # backticks from the repo key neutralized
+    assert "unknown key `1`" in joined
