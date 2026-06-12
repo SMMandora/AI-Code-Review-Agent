@@ -2,11 +2,19 @@ import hashlib
 import hmac
 import json
 
+import pytest
 from fastapi.testclient import TestClient
 
 from codereview.web.app import create_app
 from codereview.web.webhooks import route_event
 from codereview.worker import ReindexJob, ReviewJob, Worker
+
+
+@pytest.fixture
+def app_settings(settings):
+    # No anthropic key -> lifespan registers no review handler, so an enqueued job
+    # can never trigger a background GitHubClient call against the real API.
+    return settings.model_copy(update={"anthropic_api_key": ""})
 
 
 def sign(secret: str, body: bytes) -> str:
@@ -32,61 +40,61 @@ def post_event(client: TestClient, secret: str, event: str, payload: dict, sig: 
     return client.post("/webhooks/github", content=body, headers=headers)
 
 
-def test_invalid_signature_rejected(settings):
-    app = create_app(settings)
+def test_invalid_signature_rejected(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
         r = post_event(client, "wrong", "pull_request", make_pr_payload())
         assert r.status_code == 401
 
 
-def test_missing_signature_rejected(settings):
-    app = create_app(settings)
+def test_missing_signature_rejected(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
-        r = post_event(client, settings.github_webhook_secret, "ping", {}, sig=None)
+        r = post_event(client, app_settings.github_webhook_secret, "ping", {}, sig=None)
         assert r.status_code == 401
 
 
-def test_ping_returns_200(settings):
-    app = create_app(settings)
+def test_ping_returns_200(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
-        r = post_event(client, settings.github_webhook_secret, "ping", {"zen": "x"})
+        r = post_event(client, app_settings.github_webhook_secret, "ping", {"zen": "x"})
         assert r.status_code == 200
 
 
-def test_pr_opened_accepted(settings):
+def test_pr_opened_accepted(app_settings):
     # queue semantics covered by route_event unit tests; consumption is async
-    app = create_app(settings)
+    app = create_app(app_settings)
     with TestClient(app) as client:
-        r = post_event(client, settings.github_webhook_secret, "pull_request", make_pr_payload())
+        r = post_event(client, app_settings.github_webhook_secret, "pull_request", make_pr_payload())
         assert r.status_code == 202
 
 
-def test_pr_irrelevant_action_ignored(settings):
-    app = create_app(settings)
+def test_pr_irrelevant_action_ignored(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
         payload = make_pr_payload(action="labeled")
-        r = post_event(client, settings.github_webhook_secret, "pull_request", payload)
+        r = post_event(client, app_settings.github_webhook_secret, "pull_request", payload)
         assert r.status_code == 204
         assert app.state.worker.pending() == 0
 
 
-def test_wrong_repo_ignored(settings):
-    app = create_app(settings)
+def test_wrong_repo_ignored(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
         payload = make_pr_payload(repo="other/repo")
-        r = post_event(client, settings.github_webhook_secret, "pull_request", payload)
+        r = post_event(client, app_settings.github_webhook_secret, "pull_request", payload)
         assert r.status_code == 204
 
 
-def test_unknown_event_ignored(settings):
-    app = create_app(settings)
+def test_unknown_event_ignored(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
-        r = post_event(client, settings.github_webhook_secret, "watch", {"repository": {"full_name": "acme/widgets"}})
+        r = post_event(client, app_settings.github_webhook_secret, "watch", {"repository": {"full_name": "acme/widgets"}})
         assert r.status_code == 204
 
 
-def test_healthz(settings):
-    app = create_app(settings)
+def test_healthz(app_settings):
+    app = create_app(app_settings)
     with TestClient(app) as client:
         r = client.get("/healthz")
         assert r.status_code == 200

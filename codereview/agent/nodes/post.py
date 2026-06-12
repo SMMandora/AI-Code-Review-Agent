@@ -113,7 +113,11 @@ def make_post_node(deps: AgentDeps):
             if exc.status == 422 and comments:
                 log.warning("422 posting inline comments, retrying summary-only: %s", exc)
                 note = "\n\n*(Inline comments could not be anchored to the diff.)*"
-                await deps.gh.create_review(pr.number, pr.head_sha, body + note, [])
+                try:
+                    await deps.gh.create_review(pr.number, pr.head_sha, body + note, [])
+                except GitHubError:
+                    log.error("summary-only retry also failed for pr=%d", pr.number)
+                    raise
                 comments = []
             else:
                 raise
