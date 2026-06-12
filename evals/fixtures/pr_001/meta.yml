@@ -1,0 +1,3 @@
+title: Add pagination helper
+body: Implements paginate() and page_count() for 1-indexed pages.
+notes: planted - off-by-one start index; integer-division page_count; no tests added

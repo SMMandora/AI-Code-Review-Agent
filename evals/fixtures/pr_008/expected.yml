@@ -1,0 +1,6 @@
+expected:
+  - path: app/discount.py
+    line_start: 1
+    line_end: 10
+    category: test_coverage
+    pattern: "(no tests|untested|missing test|not covered)"

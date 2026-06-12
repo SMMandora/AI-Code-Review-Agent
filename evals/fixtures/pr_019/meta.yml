@@ -1,0 +1,3 @@
+title: Add file upload handler
+body: Handles user file uploads and stores them on disk.
+notes: planted - no size or type validation on uploaded file; no tests for upload endpoint

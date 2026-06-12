@@ -1,0 +1,20 @@
+diff --git a/docs/setup.md b/docs/setup.md
+new file mode 100644
+index 0000000..dddeeef
+--- /dev/null
++++ b/docs/setup.md
+@@ -0,0 +1,14 @@
++# Setup Guide
++
++## Prerequisites
++
++- Docker 24+
++- Node.js 20+
++- Python 3.12+
++
++## Environment Variables
++
++Copy `.env.example` to `.env` and fill in the values:
++
++- `DATABASE_URL` — PostgreSQL connection string
++- `ANTHROPIC_API_KEY` — API key for Claude models

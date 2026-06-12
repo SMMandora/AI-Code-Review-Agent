@@ -1,0 +1,6 @@
+expected:
+  - path: web/page.ts
+    line_start: 3
+    line_end: 5
+    category: correctness
+    pattern: "(off[- ]by[- ]one|<=|out of (bounds|range)|undefined)"

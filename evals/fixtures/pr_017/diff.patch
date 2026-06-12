@@ -1,0 +1,26 @@
+diff --git a/web/slug.ts b/web/slug.ts
+new file mode 100644
+index 0000000..aaabbb1
+--- /dev/null
++++ b/web/slug.ts
+@@ -0,0 +1,5 @@
++export function slugify(text: string): string {
++  return text
++    .toLowerCase()
++    .replace(/[^a-z0-9]+/g, "-")
++    .replace(/^-|-$/g, "");
+diff --git a/web/slug.test.ts b/web/slug.test.ts
+new file mode 100644
+index 0000000..aaabbb2
+--- /dev/null
++++ b/web/slug.test.ts
+@@ -0,0 +1,8 @@
++import { slugify } from "./slug";
++
++test("basic slug", () => {
++  expect(slugify("Hello World!")).toBe("hello-world");
++});
++
++test("numbers preserved", () => {
++  expect(slugify("Item 42")).toBe("item-42");
++});

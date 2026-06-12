@@ -1,0 +1,3 @@
+title: Render user comments
+body: Adds DOM helpers for the comment widget.
+notes: planted - innerHTML XSS on line 2; renderName is safe

@@ -1,0 +1,14 @@
+diff --git a/web/save.ts b/web/save.ts
+new file mode 100644
+index 0000000..cccdddd
+--- /dev/null
++++ b/web/save.ts
+@@ -0,0 +1,8 @@
++async function saveDraft(content: string): Promise<void> {
++  await fetch("/api/draft", { method: "POST", body: content });
++}
++
++async function autoSave(content: string): Promise<void> {
++  saveDraft(content);
++  console.log("auto-save triggered");
++}

@@ -1,0 +1,3 @@
+title: Add data sync helper
+body: Synchronizes local state with remote backend.
+notes: planted - empty catch block silently swallows sync failures

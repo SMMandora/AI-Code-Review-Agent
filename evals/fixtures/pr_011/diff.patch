@@ -1,0 +1,15 @@
+diff --git a/web/auth.ts b/web/auth.ts
+new file mode 100644
+index 0000000..aaabbbb
+--- /dev/null
++++ b/web/auth.ts
+@@ -0,0 +1,9 @@
++export function validateSession(user: { id: number | null }, token: unknown): boolean {
++  if (user.id === null) {
++    return false;
++  }
++  if (token == "") {
++    return false;
++  }
++  return true;
++}

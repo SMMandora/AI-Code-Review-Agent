@@ -1,0 +1,3 @@
+title: Add user search endpoint
+body: Queries users by username from the database.
+notes: planted - SQL query built with f-string from user input

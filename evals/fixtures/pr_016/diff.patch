@@ -1,0 +1,13 @@
+diff --git a/web/page.ts b/web/page.ts
+new file mode 100644
+index 0000000..fffaaaa
+--- /dev/null
++++ b/web/page.ts
+@@ -0,0 +1,7 @@
++export function renderItems(items: string[]): string[] {
++  const result: string[] = [];
++  for (let i = 0; i <= items.length; i++) {
++    result.push(`<li>${items[i]}</li>`);
++  }
++  return result;
++}

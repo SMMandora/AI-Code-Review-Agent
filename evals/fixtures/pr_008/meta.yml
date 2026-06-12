@@ -1,0 +1,3 @@
+title: Add discount calculator
+body: Adds percentage and flat discount helpers. Updates test file.
+notes: planted - new discount functions added but test file only renames an existing test with no new assertions

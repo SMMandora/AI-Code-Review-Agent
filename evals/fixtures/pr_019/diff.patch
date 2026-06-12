@@ -1,0 +1,17 @@
+diff --git a/web/upload.ts b/web/upload.ts
+new file mode 100644
+index 0000000..cccddde
+--- /dev/null
++++ b/web/upload.ts
+@@ -0,0 +1,11 @@
++import * as fs from "fs";
++import * as path from "path";
++
++export async function handleUpload(
++  filename: string,
++  data: Buffer
++): Promise<string> {
++  const dest = path.join("/uploads", filename);
++  await fs.promises.writeFile(dest, data);
++  return dest;
++}

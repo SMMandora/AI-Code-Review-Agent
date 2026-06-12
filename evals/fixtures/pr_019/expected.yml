@@ -1,0 +1,11 @@
+expected:
+  - path: web/upload.ts
+    line_start: 4
+    line_end: 11
+    category: security
+    pattern: "(validat|unrestricted|size|type)"
+  - path: web/upload.ts
+    line_start: 1
+    line_end: 11
+    category: test_coverage
+    pattern: "test"

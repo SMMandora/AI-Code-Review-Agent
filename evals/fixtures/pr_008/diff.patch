@@ -1,0 +1,27 @@
+diff --git a/app/discount.py b/app/discount.py
+new file mode 100644
+index 0000000..2222222
+--- /dev/null
++++ b/app/discount.py
+@@ -0,0 +1,10 @@
++def apply_percentage(price: float, pct: float) -> float:
++    """Apply a percentage discount (0-100)."""
++    return price * (1 - pct / 100)
++
++
++def apply_flat(price: float, amount: float) -> float:
++    """Apply a flat discount, floored at zero."""
++    result = price - amount
++    return max(result, 0.0)
++
+diff --git a/tests/test_discount.py b/tests/test_discount.py
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/tests/test_discount.py
+@@ -0,0 +1,5 @@
++from app.discount import apply_percentage
++
++
++def test_placeholder():
++    assert apply_percentage(100, 10) == 90.0

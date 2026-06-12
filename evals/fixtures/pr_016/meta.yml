@@ -1,0 +1,3 @@
+title: Add page renderer
+body: Renders list items as page cards.
+notes: planted - loop condition i <= items.length reads one past the end causing undefined

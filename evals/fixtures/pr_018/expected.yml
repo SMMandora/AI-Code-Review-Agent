@@ -1,0 +1,6 @@
+expected:
+  - path: web/sync.ts
+    line_start: 12
+    line_end: 15
+    category: correctness
+    pattern: "(swallow|empty catch|silenc|ignor)"

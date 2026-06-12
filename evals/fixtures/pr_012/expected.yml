@@ -1,0 +1,6 @@
+expected:
+  - path: web/render.ts
+    line_start: 1
+    line_end: 3
+    category: security
+    pattern: "(xss|innerhtml|sanitiz|escap|untrusted)"

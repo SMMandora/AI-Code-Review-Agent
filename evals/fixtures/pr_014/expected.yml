@@ -1,0 +1,11 @@
+expected:
+  - path: web/api.ts
+    line_start: 6
+    line_end: 8
+    category: style
+    pattern: "(any|type safety|cast)"
+  - path: web/api.ts
+    line_start: 1
+    line_end: 11
+    category: test_coverage
+    pattern: "test"

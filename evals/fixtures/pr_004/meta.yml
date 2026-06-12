@@ -1,0 +1,3 @@
+title: Add async notification sender
+body: Sends email notifications asynchronously.
+notes: planted - send() called without await inside async context; coroutine never executed

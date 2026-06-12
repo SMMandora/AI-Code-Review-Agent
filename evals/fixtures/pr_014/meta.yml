@@ -1,0 +1,3 @@
+title: Add API response handler
+body: Handles API responses including error branch.
+notes: planted - (resp as any).data discards type safety; new error branch has no tests

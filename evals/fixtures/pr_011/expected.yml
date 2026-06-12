@@ -1,0 +1,6 @@
+expected:
+  - path: web/auth.ts
+    line_start: 5
+    line_end: 7
+    category: correctness
+    pattern: "(===|strict|coerc)"

@@ -1,0 +1,17 @@
+diff --git a/web/api.ts b/web/api.ts
+new file mode 100644
+index 0000000..dddeeee
+--- /dev/null
++++ b/web/api.ts
+@@ -0,0 +1,11 @@
++interface ApiResponse {
++  status: number;
++}
++
++export function handleResponse(resp: ApiResponse): string {
++  if (resp.status === 200) {
++    const data = (resp as any).data;
++    return String(data);
++  }
++  return "error";
++}

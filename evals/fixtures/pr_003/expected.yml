@@ -1,0 +1,6 @@
+expected:
+  - path: app/aws.py
+    line_start: 3
+    line_end: 4
+    category: security
+    pattern: "(hardcod|secret|credential|env)"

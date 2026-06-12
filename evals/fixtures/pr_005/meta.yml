@@ -1,0 +1,3 @@
+title: Add cache lookup helper
+body: Tracks seen keys to avoid duplicate cache misses.
+notes: planted - mutable default argument seen=[] shared across all calls

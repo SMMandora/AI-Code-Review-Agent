@@ -1,0 +1,3 @@
+title: Add HTTP client configuration
+body: Configures the HTTP client with authentication token.
+notes: planted - API_TOKEN literal hardcoded instead of reading from environment

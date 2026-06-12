@@ -1,0 +1,3 @@
+title: Add draft auto-save
+body: Periodically saves draft content to backend.
+notes: planted - saveDraft() not awaited inside async function; floating promise errors are silently lost

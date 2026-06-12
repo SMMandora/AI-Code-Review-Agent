@@ -1,0 +1,6 @@
+expected:
+  - path: app/db.py
+    line_start: 4
+    line_end: 7
+    category: security
+    pattern: "(sql injection|parameteriz|f-string|concat)"

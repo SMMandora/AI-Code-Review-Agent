@@ -1,0 +1,6 @@
+expected:
+  - path: web/client.ts
+    line_start: 1
+    line_end: 1
+    category: security
+    pattern: "(hardcod|secret|token|env)"

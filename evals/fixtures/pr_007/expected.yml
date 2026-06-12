@@ -1,0 +1,6 @@
+expected:
+  - path: app/files.py
+    line_start: 4
+    line_end: 7
+    category: correctness
+    pattern: "(race|toctou|check.then|atomic)"

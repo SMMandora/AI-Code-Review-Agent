@@ -1,0 +1,11 @@
+expected:
+  - path: app/report.py
+    line_start: 4
+    line_end: 5
+    category: style
+    pattern: "(print|logger|logging)"
+  - path: app/report.py
+    line_start: 11
+    line_end: 12
+    category: correctness
+    pattern: "(except|swallow|silenc)"

@@ -1,0 +1,14 @@
+diff --git a/web/client.ts b/web/client.ts
+new file mode 100644
+index 0000000..eeeefff
+--- /dev/null
++++ b/web/client.ts
+@@ -0,0 +1,8 @@
++const API_TOKEN = "sk-live-abc123secrettoken456";
++
++export function createHeaders(): Record<string, string> {
++  return {
++    Authorization: `Bearer ${API_TOKEN}`,
++    "Content-Type": "application/json",
++  };
++}

@@ -1,0 +1,3 @@
+title: Refactor string helpers
+body: Extracts truncate() and slugify() into a shared module with full test coverage.
+notes: clean refactor - no issues expected

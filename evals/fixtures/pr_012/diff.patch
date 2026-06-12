@@ -1,0 +1,13 @@
+diff --git a/web/render.ts b/web/render.ts
+new file mode 100644
+index 0000000..bbbbbbb
+--- /dev/null
++++ b/web/render.ts
+@@ -0,0 +1,7 @@
++export function renderComment(el: HTMLElement, comment: string): void {
++  el.innerHTML = comment;
++}
++
++export function renderName(el: HTMLElement, name: string): void {
++  el.textContent = name;
++}

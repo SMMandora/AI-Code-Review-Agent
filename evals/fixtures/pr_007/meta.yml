@@ -1,0 +1,3 @@
+title: Add file initializer utility
+body: Creates files if they do not exist yet.
+notes: planted - TOCTOU race between os.path.exists check and open() call

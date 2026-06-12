@@ -1,0 +1,3 @@
+title: Add report generator
+body: Generates monthly usage reports.
+notes: planted - print() debugging statement in library code; bare except pass swallows errors

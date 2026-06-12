@@ -1,0 +1,13 @@
+diff --git a/app/files.py b/app/files.py
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/app/files.py
+@@ -0,0 +1,7 @@
++import os
++
++
++def ensure_file(path: str) -> None:
++    if not os.path.exists(path):
++        with open(path, "w") as f:
++            f.write("")
