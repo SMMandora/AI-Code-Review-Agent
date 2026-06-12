@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>AI Code Review — Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 2rem auto; max-width: 860px; color: #222; }
+    h1 { font-size: 1.4rem; }
+    .cards { display: flex; gap: 1rem; margin: 1rem 0; flex-wrap: wrap; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: .8rem 1.2rem; }
+    .card b { display: block; font-size: 1.3rem; }
+    table { border-collapse: collapse; width: 100%; font-size: .85rem; }
+    th, td { border-bottom: 1px solid #eee; padding: .4rem .5rem; text-align: left; }
+    .status-completed { color: #2a7; } .status-failed, .status-cost_exceeded { color: #d33; }
+    .status-skipped { color: #888; }
+    code { background: #f6f6f6; padding: 0 .3em; }
+  </style>
+</head>
+<body>
+  <h1>🤖 AI Code Review — recent reviews</h1>
+  <div class="cards">
+    <div class="card"><b>{{ stats.count }}</b>reviews (last 50)</div>
+    <div class="card"><b>${{ "%.4f"|format(stats.avg_cost) }}</b>avg cost / review</div>
+    <div class="card"><b>${{ "%.4f"|format(stats.total_cost) }}</b>total cost</div>
+    <div class="card"><b>{{ "%.1f"|format(stats.p50_s) }}s</b>p50 duration</div>
+    <div class="card"><b>{{ "%.1f"|format(stats.p95_s) }}s</b>p95 duration</div>
+  </div>
+  <h2>Cost per PR over time</h2>
+  {{ chart_svg | safe }}
+  <h2>Reviews</h2>
+  <table>
+    <tr><th>PR</th><th>SHA</th><th>trigger</th><th>status</th><th>findings</th>
+        <th>comments</th><th>tokens in/out</th><th>cost</th><th>duration</th><th>at</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>#{{ r.pr_number }}</td>
+      <td><code>{{ r.head_sha[:7] }}</code></td>
+      <td>{{ r.trigger }}</td>
+      <td class="status-{{ r.status }}">{{ r.status }}</td>
+      <td>{{ r.findings_total }}</td>
+      <td>{{ r.comments_posted }}</td>
+      <td>{{ r.input_tokens }}/{{ r.output_tokens }}</td>
+      <td>${{ "%.4f"|format(r.cost_usd) }}</td>
+      <td>{{ "%.1f"|format((r.duration_ms or 0) / 1000) }}s</td>
+      <td>{{ r.created_at }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>

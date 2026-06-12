@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 
 from anthropic import AsyncAnthropic
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
 
 from codereview.agent.graph import make_run_review
 from codereview.agent.state import AgentDeps
@@ -11,6 +10,7 @@ from codereview.github.client import GitHubClient
 from codereview.log import configure_logging
 from codereview.settings import Settings
 from codereview.stores import InMemoryReviewStore, ReviewRecord
+from codereview.web.dashboard import router as dashboard_router
 from codereview.web.webhooks import router as webhook_router
 from codereview.worker import ReviewJob, Worker
 
@@ -105,10 +105,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     app = FastAPI(title="AI Code Review Agent", lifespan=lifespan)
     app.include_router(webhook_router)
-
-    @app.get("/healthz")
-    async def healthz() -> JSONResponse:
-        db = app.state.db
-        return JSONResponse({"ok": True, "db": bool(db) and await db.ping()})
+    app.include_router(dashboard_router)
 
     return app
