@@ -1,4 +1,7 @@
+import io
 import logging
+import tarfile
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import PurePosixPath
 
@@ -65,3 +68,66 @@ def comment_chunk(comment: dict) -> Chunk | None:
         return None
     path = comment.get("path") or ""
     return Chunk("pr_comment", path, 0, 0, f"{path}: {body}"[:4000])
+
+
+def extract_tarball(tar_bytes: bytes) -> list[tuple[str, str]]:
+    """(path, text) pairs from a GitHub tarball; strips the root dir; size-capped."""
+    out: list[tuple[str, str]] = []
+    with tarfile.open(fileobj=io.BytesIO(tar_bytes), mode="r:gz") as tf:
+        for member in tf.getmembers():
+            if not member.isreg() or member.size > MAX_INDEX_BYTES:
+                continue
+            parts = member.name.split("/", 1)
+            if len(parts) != 2 or not parts[1]:
+                continue
+            f = tf.extractfile(member)
+            if f is None:
+                continue
+            out.append((parts[1], f.read().decode("utf-8", errors="replace")))
+    return out
+
+
+class Indexer:
+    def __init__(self, store, embedder, skip: Callable[[str], bool] | None = None) -> None:
+        self.store = store
+        self.embedder = embedder
+        self.skip = skip or (lambda path: False)
+
+    async def _index_chunks(self, chunks: list[Chunk], commit_sha: str) -> int:
+        if not chunks:
+            return 0
+        embeddings = await self.embedder.embed_documents([c.content for c in chunks])
+        await self.store.upsert(chunks, embeddings, commit_sha)
+        return len(chunks)
+
+    async def seed_from_tarball(self, tar_bytes: bytes, commit_sha: str, repo: str) -> int:
+        await self.store.wipe()
+        chunks: list[Chunk] = []
+        for path, text in extract_tarball(tar_bytes):
+            if self.skip(path):
+                continue
+            chunks.extend(chunk_file(path, text))
+        n = await self._index_chunks(chunks, commit_sha)
+        await self.store.set_index_state(repo, commit_sha)
+        log.info("seeded %d chunks at %s", n, commit_sha)
+        return n
+
+    async def index_pr_comments(self, comments: list[dict], commit_sha: str) -> int:
+        chunks = [c for c in (comment_chunk(cm) for cm in comments) if c is not None]
+        return await self._index_chunks(chunks, commit_sha)
+
+    async def reindex_paths(
+        self, gh, changed: list[str], removed: list[str], after_sha: str, repo: str
+    ) -> int:
+        await self.store.delete_paths(list(changed) + list(removed))
+        chunks: list[Chunk] = []
+        for path in changed:
+            if self.skip(path) or not (is_code_path(path) or is_style_path(path)):
+                continue
+            text = await gh.get_file(path, after_sha)
+            if text is not None:
+                chunks.extend(chunk_file(path, text))
+        n = await self._index_chunks(chunks, after_sha)
+        await self.store.set_index_state(repo, after_sha)
+        log.info("reindexed %d chunks at %s", n, after_sha)
+        return n

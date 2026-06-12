@@ -64,6 +64,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             app.state.deps = deps
             app.state.worker.register(ReviewJob, make_run_review(deps))
             app.state.worker.on_error = make_on_error(deps)
+            if app.state.db is not None and settings.voyage_api_key:
+                from codereview.rag.embedder import Embedder
+                from codereview.rag.indexer import Indexer
+                from codereview.rag.store import ChunkStore
+                from codereview.worker import ReindexJob
+
+                chunk_store = ChunkStore(app.state.db)
+                indexer = Indexer(
+                    store=chunk_store, embedder=Embedder(api_key=settings.voyage_api_key)
+                )
+
+                async def run_reindex(job: ReindexJob) -> None:
+                    await indexer.reindex_paths(
+                        gh, list(job.changed), list(job.removed), job.after_sha,
+                        settings.github_repo,
+                    )
+
+                app.state.worker.register(ReindexJob, run_reindex)
         await app.state.worker.start()
         log.info("started: repo=%s db=%s", settings.github_repo, bool(app.state.db))
         yield
