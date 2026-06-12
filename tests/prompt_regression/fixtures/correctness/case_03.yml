@@ -20,5 +20,5 @@ diff: |
 planted_bug:
   path: app/metrics.py
   line: 5
-  pattern: "(zero ?division|divide|count.*0)"
+  pattern: "(zero ?division|divide|by zero|count.*0)"
 must_still_find: true

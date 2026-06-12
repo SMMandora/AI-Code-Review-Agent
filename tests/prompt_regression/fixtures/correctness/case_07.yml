@@ -19,5 +19,5 @@ diff: |
 planted_bug:
   path: legacy_do_not_review.py
   line: 5
-  pattern: "(zero ?division|divide|count.*0)"
+  pattern: "(zero ?division|divide|by zero|count.*0)"
 must_still_find: true

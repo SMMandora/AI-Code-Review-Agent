@@ -21,5 +21,5 @@ diff: |
 planted_bug:
   path: app/throughput.py
   line: 7
-  pattern: "(zero ?division|divide|count.*0)"
+  pattern: "(zero ?division|divide|by zero|count.*0)"
 must_still_find: true

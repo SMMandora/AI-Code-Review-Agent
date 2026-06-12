@@ -21,5 +21,5 @@ diff: |
 planted_bug:
   path: app/shipping.py
   line: 5
-  pattern: "(no tests?|untested|missing test|add (a )?test|not covered)"
+  pattern: "(no tests?|untested|missing test|add (a )?test|not covered|lacks? test|should have tests?|needs? tests?|test coverage|no corresponding test)"
 must_still_find: true

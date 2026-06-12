@@ -19,5 +19,5 @@ diff: |
 planted_bug:
   path: tests_ignore.ts
   line: 3
-  pattern: "(no tests?|untested|missing test|add (a )?test|not covered)"
+  pattern: "(no tests?|untested|missing test|add (a )?test|not covered|lacks? test|should have tests?|needs? tests?|test coverage|no corresponding test)"
 must_still_find: true
