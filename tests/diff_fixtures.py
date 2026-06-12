@@ -60,3 +60,23 @@ diff --git a/logo.png b/logo.png
 index 1111111..2222222 100644
 Binary files a/logo.png and b/logo.png differ
 """
+
+LONG_FILE_DIFF = """\
+diff --git a/app/util.py b/app/util.py
+new file mode 100644
+index 0000000..aabbcc1
+--- /dev/null
++++ b/app/util.py
+@@ -0,0 +1,11 @@
++def fn1(): pass
++def fn2(): pass
++def fn3(): pass
++def fn4(): pass
++def fn5(): pass
++def fn6(): pass
++def fn7(): pass
++def fn8(): pass
++def fn9(): pass
++def fn10(): pass
++def fn11(): pass
+"""

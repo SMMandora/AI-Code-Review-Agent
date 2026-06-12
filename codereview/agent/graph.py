@@ -8,7 +8,7 @@ from codereview.agent.nodes.checks import make_check_node
 from codereview.agent.nodes.context import make_context_node
 from codereview.agent.nodes.fetch import make_fetch_node
 from codereview.agent.nodes.post import make_post_node
-from codereview.agent.state import AgentDeps, ReviewState
+from codereview.agent.state import CATEGORIES, AgentDeps, ReviewState
 from codereview.stores import ReviewRecord
 from codereview.worker import ReviewJob
 
@@ -31,12 +31,15 @@ def build_graph(deps: AgentDeps):
     g = StateGraph(ReviewState)
     g.add_node("fetch", make_fetch_node(deps))
     g.add_node("embed_context", make_context_node(deps))
-    g.add_node("check_correctness", make_check_node("correctness", deps))
+    for category in CATEGORIES:
+        g.add_node(f"check_{category}", make_check_node(category, deps))
     g.add_node("post", make_post_node(deps))
+
     g.add_edge(START, "fetch")
     g.add_conditional_edges("fetch", route_after_fetch, {"skip": END, "go": "embed_context"})
-    g.add_edge("embed_context", "check_correctness")
-    g.add_edge("check_correctness", "post")
+    for category in CATEGORIES:
+        g.add_edge("embed_context", f"check_{category}")  # fan-out: parallel superstep
+    g.add_edge([f"check_{category}" for category in CATEGORIES], "post")  # fan-in barrier
     g.add_edge("post", END)
     return g.compile()
 

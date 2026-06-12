@@ -3,36 +3,11 @@ import re
 import time
 
 from codereview.agent.cost import total_cost_usd
+from codereview.agent.dedup import apply_dedup
 from codereview.agent.state import AgentDeps, Finding, ReviewState
-from codereview.diff import DiffFile, snap_line
 from codereview.github.client import GitHubError
 
 log = logging.getLogger(__name__)
-
-SEV_ORDER = {"high": 0, "medium": 1, "low": 2}
-CATEGORY_ORDER = {"security": 0, "correctness": 1, "test_coverage": 2, "style": 3}
-MAX_INLINE = 7
-
-
-def anchor_findings(
-    findings: list[Finding], diff_files: list[DiffFile]
-) -> tuple[list[Finding], list[Finding]]:
-    """Snap to commentable lines; overflow and unanchored go to the summary (spec §10)."""
-    by_path = {f.path: f for f in diff_files}
-    ordered = sorted(
-        findings,
-        key=lambda f: (SEV_ORDER[f.severity], CATEGORY_ORDER.get(f.category, 9), f.path, f.line),
-    )
-    inline: list[Finding] = []
-    summary: list[Finding] = []
-    for f in ordered:
-        df = by_path.get(f.path)
-        snapped = snap_line(df, f.line) if df is not None else None
-        if snapped is None:
-            summary.append(f)
-        else:
-            inline.append(f.model_copy(update={"line": snapped}))
-    return inline[:MAX_INLINE], summary + inline[MAX_INLINE:]
 
 
 def _suggestion_block(code: str) -> str:
@@ -101,7 +76,10 @@ def make_post_node(deps: AgentDeps):
         if errors and not findings:
             return {"skip_reason": "all_checks_failed"}
 
-        inline, summary_only = anchor_findings(findings, state.get("diff_files", []))
+        dd = apply_dedup(
+            findings, state.get("diff_files", []), threshold=cfg.severity_threshold
+        )
+        inline, summary_only = dd.inline, dd.summary_only
         body = compose_review_body(state, summary_only, cost)
         comments = [
             {"path": f.path, "line": f.line, "side": "RIGHT", "body": format_comment(f)}

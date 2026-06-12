@@ -33,6 +33,23 @@ class FakeAnthropic:
         return item
 
 
+class FakeAnthropicByCategory:
+    def __init__(self, by_category: dict[str, list]) -> None:
+        self._by_cat = {k: list(v) for k, v in by_category.items()}
+        self.calls: list[dict] = []
+        self.messages = SimpleNamespace(parse=self._parse)
+
+    async def _parse(self, **kwargs):
+        self.calls.append(kwargs)
+        for cat, queue in self._by_cat.items():
+            if f"rubric — {cat}" in kwargs["system"] and queue:
+                item = queue.pop(0)
+                if isinstance(item, Exception):
+                    raise item
+                return item
+        raise AssertionError("no queued response for this category")
+
+
 class FakeVoyage:
     """Duck-type of voyageai.AsyncClient."""
 
