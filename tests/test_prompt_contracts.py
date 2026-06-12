@@ -50,8 +50,11 @@ def test_injected_pr_body_stays_inside_a_fence(payload):
     files = parse_diff(diff)
     pr = PRMeta(1, "t", payload, "mallory", "sha", "main", "main")
     out = render_user(pr, files, None, "security")
-    # every UNTRUSTED open-fence has a matching close fence of the same length
+    # every UNTRUSTED open-fence has a matching close fence of the same length;
+    # render_user fences the PR body and the diff, so dropping fence() entirely
+    # must fail here rather than passing vacuously
     markers = re.findall(r"(`{4,})UNTRUSTED\n", out)
+    assert len(markers) >= 2
     for m in markers:
         assert out.count(m) >= 2  # opener + closer
     # the final instruction line (trusted) comes after the last fence
