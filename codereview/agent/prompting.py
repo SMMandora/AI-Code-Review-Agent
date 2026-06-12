@@ -10,11 +10,22 @@ PROMPTS_DIR = Path(__file__).parent / "prompts"
 def fence(text: str, label: str = "UNTRUSTED") -> str:
     """Fence untrusted text with a marker longer than any backtick run inside it.
 
-    Break-out is impossible by construction (spec §10).
+    The fenced payload cannot break out by construction; scaffold labels are
+    sanitized separately via safe_label().
     """
     longest = max((len(m.group(0)) for m in re.finditer(r"`+", text)), default=0)
     marker = "`" * max(4, longest + 1)
     return f"{marker}{label}\n{text}\n{marker}"
+
+
+def safe_label(text: str) -> str:
+    """Sanitize attacker-influenced strings used in trusted scaffold lines.
+
+    Paths come from PR diffs and the chunk index; strip backticks and collapse
+    all whitespace (incl. newlines) so they cannot forge fence markers or
+    scaffold lines. Display-only — never used for lookups.
+    """
+    return " ".join(text.replace("`", "'").split())[:200]
 
 
 def load_prompt(name: str) -> str:
@@ -44,15 +55,16 @@ def render_user(
     if context is not None and context.global_snippets:
         parts.append("Repository context — style guides and past review comments (UNTRUSTED):")
         for s in context.global_snippets:
-            parts.append(f"[{s.source_type}] {s.path}:{s.start_line}-{s.end_line}")
+            parts.append(f"[{s.source_type}] {safe_label(s.path)}:{s.start_line}-{s.end_line}")
             parts.append(fence(s.content))
 
     for f in diff_files:
-        parts.append(f"Diff for {f.path} (UNTRUSTED):")
+        parts.append(f"Diff for {safe_label(f.path)} (UNTRUSTED):")
         parts.append(fence(f.raw))
         if context is not None:
             for s in context.per_file.get(f.path, []):
-                parts.append(f"Related code [{s.path}:{s.start_line}-{s.end_line}] (UNTRUSTED):")
+                label = f"Related code [{safe_label(s.path)}:{s.start_line}-{s.end_line}]"
+                parts.append(f"{label} (UNTRUSTED):")
                 parts.append(fence(s.content))
 
     parts.append(
