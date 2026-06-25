@@ -56,11 +56,12 @@ export default function KnowledgePage() {
     getIndexStats().then(setStats);
   }, []);
 
-  // Initial load + debounced search
+  // Initial load + debounced search. setLoading lives inside the deferred
+  // callback (not the effect body) to avoid synchronous cascading renders.
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    setLoading(true);
     debounceRef.current = setTimeout(() => {
+      setLoading(true);
       searchChunks(query).then((data) => {
         setChunks(data);
         setLoading(false);

@@ -96,9 +96,9 @@ export async function getRunStatus(_n: number): Promise<RunNode[]> {
   return real(`/pulls/${_n}/status`);
 }
 
-export async function getAgentRun(_id?: string): Promise<RunNode[]> {
+export async function getAgentRun(reviewId?: string): Promise<RunNode[]> {
   if (USE_MOCKS) return delay().then(() => mock.agentNodes);
-  return real(`/agent/run`);
+  return real(reviewId ? `/agent/run?review=${reviewId}` : "/agent/run");
 }
 
 export async function getIndexStats(): Promise<IndexStats> {
