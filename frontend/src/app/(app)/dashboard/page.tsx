@@ -45,10 +45,10 @@ export default async function DashboardPage() {
           <CardContent>
             <div className="flex h-40 items-end gap-1.5">
               {stats.reviewsPerDay.map((d) => (
-                <div key={d.date} className="flex flex-1 flex-col items-center gap-2">
+                <div key={d.date} className="flex h-full flex-1 flex-col justify-end">
                   <div
                     className="w-full rounded-t bg-gradient-to-t from-blue-500/40 to-blue-400"
-                    style={{ height: `${(d.count / maxDay) * 100}%` }}
+                    style={{ height: `${Math.max((d.count / maxDay) * 100, 4)}%` }}
                     title={`${d.date}: ${d.count}`}
                   />
                 </div>

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CodeGuardian Frontend
 
-## Getting Started
+The web UI for the AI Code Review Agent — a Next.js 16 (App Router) + React 19 +
+Tailwind v4 + shadcn/ui dashboard. Dark, repository-aware, fully responsive.
 
-First, run the development server:
+It runs against a typed API client (`src/lib/api/client.ts`) backed by deterministic mock
+data, so every screen renders and demos with **no backend required**. When the backend's
+`/api/*` endpoints exist, set `NEXT_PUBLIC_USE_MOCKS=false` and the same client targets them.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev      # http://localhost:3000
+# or: npm run build && npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Other scripts: `npm run lint`, and `npm run screenshots` (captures the gallery below via
+Playwright against a running `next start` on port 3100 — see `scripts/capture-screenshots.mjs`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Screens
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Landing | Dashboard |
+|---|---|
+| ![Landing](../docs/screenshots/landing.png) | ![Dashboard](../docs/screenshots/dashboard.png) |
 
-## Learn More
+| Pull Requests | Pull Request Analysis |
+|---|---|
+| ![Pull Requests](../docs/screenshots/pulls.png) | ![PR Analysis](../docs/screenshots/pr-analysis.png) |
 
-To learn more about Next.js, take a look at the following resources:
+| AI Review Results | LangGraph Agent Visualization |
+|---|---|
+| ![Review Results](../docs/screenshots/review-results.png) | ![Agent](../docs/screenshots/agent.png) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Knowledge Base & RAG Explorer | Cost Analytics |
+|---|---|
+| ![Knowledge](../docs/screenshots/knowledge.png) | ![Costs](../docs/screenshots/costs.png) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Review History | Settings |
+|---|---|
+| ![History](../docs/screenshots/history.png) | ![Settings](../docs/screenshots/settings.png) |
 
-## Deploy on Vercel
+**Mobile (responsive):**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+![Mobile dashboard](../docs/screenshots/mobile-dashboard.png)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Stack
+
+Next.js · React · TypeScript · Tailwind v4 · shadcn/ui (Base UI) · Recharts · React Flow
+(`@xyflow/react`) · next-themes · lucide-react. See
+[`docs/superpowers/specs/2026-06-12-frontend-design.md`](../docs/superpowers/specs/2026-06-12-frontend-design.md)
+for the design spec and the deferred backend-wiring phase.

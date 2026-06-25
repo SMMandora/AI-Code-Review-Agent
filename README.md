@@ -8,7 +8,12 @@ line-specific review comments as one GitHub review per PR head SHA. It runs as a
 Docker container — FastAPI webhook receiver, in-process background worker, LangGraph agent,
 and a server-rendered dashboard — with Postgres (pgvector) as the only external service.
 
-> **Dashboard screenshot placeholder** — `GET /` once the server is running.
+![CodeGuardian dashboard](docs/screenshots/dashboard.png)
+
+A full **Next.js frontend** (dark, repository-aware UI) lives in [`frontend/`](frontend/) —
+PR analysis, AI review results, a LangGraph agent visualization, a RAG knowledge explorer,
+cost analytics, and settings. See the [screen gallery](frontend/README.md#screens) for all
+ten screens.
 
 See [docs/architecture.md](docs/architecture.md) for component diagrams and design decisions.
 
